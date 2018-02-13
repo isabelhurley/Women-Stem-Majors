@@ -1,6 +1,7 @@
 from bokeh.models.sources import ColumnDataSource
+from bokeh.models import NumeralTickFormatter
 from bokeh.plotting import figure, curdoc
-from bokeh.layouts import column, layout
+from bokeh.layouts import column, layout, widgetbox
 import pandas
 
 def setup_datasource(url):
@@ -10,10 +11,12 @@ def setup_datasource(url):
 
 
 def simple_bargraph(source):
-    p = figure(plot_width=400, plot_height=400)
-    p.vbar(x=[1, 2, 3], width=0.5, bottom=0,
-           top=[1.2, 2.5, 3.7], color="firebrick")
-    return layout(p)
+    p = figure(x_range=source.data['Major'], plot_width=2000, plot_height=600, title='Median income by major')
+
+    p.vbar(source=source, x='Major', width=0.5, bottom=0,
+           top='Median', color="firebrick")
+    p.yaxis.formatter = NumeralTickFormatter(format="0a")
+    return layout(p, sizing_mode='stretch_both')
 
 
 def main():
