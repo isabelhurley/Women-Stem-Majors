@@ -13,11 +13,11 @@ def setup_datasource(url):
     data_frame = data_frame.fillna(0.5)  # this is what notes/assumptions refers to
     data_source = ColumnDataSource(data_frame)
     source = preprocess_datasource(data_source)
-    print(source)
     return data_frame, ColumnDataSource(source)
 
 
-def preprocess_datasource(source):  #CDS
+# add columns to datasource to reorder plots by share of women in major
+def preprocess_datasource(source):  # CDS
     new_source = dict()
     new_source['x_top'] = list(source.data['Rank'])
     new_source['y_top'] = list(source.data['Median'])
@@ -31,7 +31,7 @@ def preprocess_datasource(source):  #CDS
     rank_median_tuples = []
 
     for index, share in enumerate(source.data['ShareWomen']):
-        y = share if not math.isnan(share) else ""  # TODO downstream effects?
+        y = share if not math.isnan(share) else ""  # shouldn't be necessary after data_frame.fillna(.5)
         rank_share_tuples.append((source.data['Rank'][index], y))
 
     rank_share_tuples = sorted(rank_share_tuples, key=lambda x: x[1])
@@ -42,28 +42,30 @@ def preprocess_datasource(source):  #CDS
 
     rank_median_tuples = sorted(rank_median_tuples, key=lambda x: x[0])
     medians_by_share_women = [y[1] for y in rank_median_tuples]
-    new_source['rank_by_share_women'] = rank_by_share_women # just for lower plot's x
+    new_source['rank_by_share_women'] = rank_by_share_women
     new_source['medians_by_share_women'] = medians_by_share_women
     new_source['share_women_sorted'] = share_women_sorted
 
     return new_source
 
 
+# format Median income bargraph
 def simple_bargraph(source):
     p = figure(plot_width=2000, plot_height=600, title='Median Income by Major')
     p.vbar(source=source, x='x_top', width=0.5, bottom=0,
            top='y_top', color="firebrick")
     p.yaxis.formatter = NumeralTickFormatter(format="0a")
-    p.xaxis.axis_label = 'Major ranked by median income'
+    p.xaxis.axis_label = 'Major ranked by median income (high to low)'
 
     return p
 
 
+# format women as share bargraph
 def share_women_by_rank(source, bargraph):
     p = figure(x_range=bargraph.x_range, plot_width=200, plot_height=200, title='Women as Share of Major')
     p.vbar(source=source, x='x_bottom', width=0.5, bottom=0, top='y_bottom', color='blue')
     p.yaxis.formatter = NumeralTickFormatter(format="0%")
-    p.xaxis.axis_label = 'Major ranked by median income'
+    p.xaxis.axis_label = 'Major ranked by median income (high to low)'
 
     return p
 
@@ -74,23 +76,24 @@ def sort_selection_bar():
     return select
 
 
-def reorder_plots(attr, old, new, select, source):
-    print("source col names")
-    print(source.column_names)
+# callback function for select bar selection change
+def reorder_plots(attr, old, new, select, source, median_plot, women_plot):
     new_source = source.data.copy()
-    # print('share women pre-reset')
-    # print(source.data['ShareWomen'])
-    # already wrong by here
-    if select.value == select.options[1]: # share women
+
+    if select.value == select.options[1]: # rank by share women
         new_source['y_bottom'] = source.data['share_women_sorted']
         new_source['x_top'] = source.data['rank_by_share_women']
         new_source['y_top'] = source.data['medians_by_share_women']
+        median_plot.xaxis.axis_label = "Major ranked by share of women (low to high)"
+        women_plot.xaxis.axis_label = "Major ranked by share of women (low to high)"
 
     elif select.value == select.options[0]: # rank by income
         new_source['x_top'] = source.data['Rank']
         new_source['y_top'] = source.data['Median']
         new_source['x_bottom'] = source.data['Rank']
         new_source['y_bottom'] = source.data['ShareWomen']
+        median_plot.xaxis.axis_label = "Major ranked by median income (high to low)"
+        women_plot.xaxis.axis_label = "Major ranked by median income (high to low)"
 
     source.data = new_source
 
@@ -110,7 +113,6 @@ def main():
     df, source = setup_datasource(data_url)
 
     bargraph = simple_bargraph(source)
-
     select = sort_selection_bar()
     select.on_change('value', partial(reorder_plots, select=select, source=source))
 
@@ -120,7 +122,8 @@ def main():
 main()
 
 
-#TODO sort by share women, update labels
+#TODO update labels
+# Ideas to extend app:
 # regressions?
-#stem or not
-#show 50% clearly
+# stem vs humanities
+# show 50% mark clearly
