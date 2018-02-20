@@ -19,7 +19,6 @@ def simple_bargraph(source):
            top='Median', color="firebrick")
     p.yaxis.formatter = NumeralTickFormatter(format="0a")
     p.xaxis.axis_label = 'Major ranked by median income'
-    # return layout(p, sizing_mode='stretch_both')
     return p
 
 def share_women_by_rank(source, bargraph):
@@ -35,10 +34,21 @@ def sort_selection_bar():
     return select
 
 def reorder_plots(attr, old, new, select, source):
-    share_women_list = source.data['ShareWomen']
     index_tuple_list = []
 
-    print(select.value)
+    for i, share in enumerate(source.data['ShareWomen']):
+        index_tuple_list.append((source.data['Rank'][i], share))
+
+    index_tuple_list = sorted(index_tuple_list, key=lambda x: x[1])
+    print("********************************")
+
+    new_indices = [x[0] for x in index_tuple_list]
+    print type(new_indices[0])
+
+    new_source = dict(source.data)
+    new_source['Rank'] = new_indices
+    #TODO interesting–something changes but now neither order is right
+    source.data = new_source
 
 
 def set_layout(select, primary, secondary):
