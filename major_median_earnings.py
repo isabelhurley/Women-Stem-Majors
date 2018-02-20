@@ -112,11 +112,12 @@ def main():
     data_url = 'https://raw.githubusercontent.com/isabelhurley/data/master/college-majors/recent-grads.csv'
     df, source = setup_datasource(data_url)
 
-    bargraph = simple_bargraph(source)
+    median_bargraph = simple_bargraph(source)
+    women_bargraph = share_women_by_rank(source, median_bargraph)
     select = sort_selection_bar()
-    select.on_change('value', partial(reorder_plots, select=select, source=source))
+    select.on_change('value', partial(reorder_plots, select=select, source=source, median_plot=median_bargraph, women_plot=women_bargraph))
 
-    curdoc().add_root(set_layout(select, bargraph, share_women_by_rank(source, bargraph)))
+    curdoc().add_root(set_layout(select, median_bargraph, women_bargraph))
 
 
 main()
