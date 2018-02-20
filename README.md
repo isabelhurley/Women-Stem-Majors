@@ -1,6 +1,9 @@
 # Women-Stem-Majors
 
-####To run:
+####To Run
+
+Install bokeh, then execute:
+
 bokeh serve --show major_median_earnings.py
 
 ####Notes/Assumptions: 
