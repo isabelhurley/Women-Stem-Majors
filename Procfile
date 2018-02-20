@@ -1,1 +1,1 @@
-web: bokeh serve --port=$PORT --address=0.0.0.0 --use-xheaders major_median_earnings.py
+web: bokeh serve --port=$PORT --allow-websocket-origin=women-stem-majors.herokuapp.com --address=0.0.0.0 --use-xheaders major_median_earnings.py
