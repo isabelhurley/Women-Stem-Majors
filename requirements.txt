@@ -1,10 +1,7 @@
-[source]
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 
-[packages]
 bokeh = "*"
 pandas = "*"
 
-[requires]
 python_version = "3.6"
