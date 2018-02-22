@@ -1,8 +1,10 @@
 import math
+from os.path import dirname, join
+
 from functools import partial
 from bokeh.models.sources import ColumnDataSource
 from bokeh.models.widgets import Select
-from bokeh.models import NumeralTickFormatter
+from bokeh.models import NumeralTickFormatter, Div
 from bokeh.plotting import figure, curdoc
 from bokeh.layouts import column, layout, widgetbox, row
 import pandas
@@ -80,14 +82,14 @@ def sort_selection_bar():
 def reorder_plots(attr, old, new, select, source, median_plot, women_plot):
     new_source = source.data.copy()
 
-    if select.value == select.options[1]: # rank by share women
+    if select.value == select.options[1]:  # rank by share women
         new_source['y_bottom'] = source.data['share_women_sorted']
         new_source['x_top'] = source.data['rank_by_share_women']
         new_source['y_top'] = source.data['medians_by_share_women']
         median_plot.xaxis.axis_label = "Major ranked by share of women (low to high)"
         women_plot.xaxis.axis_label = "Major ranked by share of women (low to high)"
 
-    elif select.value == select.options[0]: # rank by income
+    elif select.value == select.options[0]:  # rank by income
         new_source['x_top'] = source.data['Rank']
         new_source['y_top'] = source.data['Median']
         new_source['x_bottom'] = source.data['Rank']
@@ -99,7 +101,10 @@ def reorder_plots(attr, old, new, select, source, median_plot, women_plot):
 
 
 def set_layout(select, primary, secondary):
+    desc = Div(text=open(join(dirname(__file__), "webpage/description.html")).read())
+
     return layout([
+        [desc],
         [widgetbox(select)],
         [primary],
         [secondary],
@@ -118,6 +123,7 @@ def main():
     select.on_change('value', partial(reorder_plots, select=select, source=source, median_plot=median_bargraph, women_plot=women_bargraph))
 
     curdoc().add_root(set_layout(select, median_bargraph, women_bargraph))
+    curdoc().title = "Median-Income"
 
 
 main()
@@ -125,6 +131,9 @@ main()
 
 #TODO update labels
 # Ideas to extend app:
+# title, hover tool
 # regressions?
 # stem vs humanities
 # show 50% mark clearly
+# within nursing income distribution?
+# changes in median income/share women over time?
